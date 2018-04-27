@@ -17,3 +17,8 @@ Route::get('/', function () {
 Route::get('/shops','ApiController@shops');
 Route::get('/foods','ApiController@foods');
 Route::get('/show','ApiController@show');
+//Route::get('/text',function (){
+//\Illuminate\Support\Facades\Redis::setex('name',300,'123');
+//
+//
+//});
