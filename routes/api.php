@@ -66,4 +66,22 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::get('/sms','Smscontroller@sends');
 Route::post('/regist','RegistController@save')->name('/regist');
 Route::post('/check','LoginController@check')->name('/check');
-
+Route::post('/changepwd','UsersController@change')->name('/changepwd');
+//保存忘记密码
+Route::post('/forgetpwd','UsersController@forget');
+//收货地址首页
+Route::get('/addresslist','AddressController@index');
+//修改收货地址回显
+Route::get('/address','AddressController@edit');
+Route::post('/editaddress','AddressController@update');
+//保存收货地址
+Route::post('/addaddress','AddressController@store');
+//购物车保存
+Route::post('/addcate','CateController@store');
+//显示商品 数量 以及 价格
+Route::get('/cart','CateController@index');
+//添加订单
+Route::post('/addorder','OrderController@create')->name('addorder');
+Route::get('/order','OrderController@index');
+Route::get('/orderlist','OrderController@order');
+Route::post('/pay','PayController@send')->name('pay');
