@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\SphinxClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
@@ -9,21 +10,44 @@ use Illuminate\Support\Facades\Redis;
 class ApiController extends Controller
 {
     //店铺列表
-    public function shops()
+    public function shops(Request $request)
     {
-//        $redis=new \Redis();
-        $data=Redis::get('shops');
-        if ($data==false){
-            $res = DB::table('business_details')->get();
-//            dd($res);
-           Redis::set('shops',serialize($res),3600);
-        }else{
-            $res=unserialize($data);
-        }
-//        dd(json_encode($res));
-        return json_encode($res);
-    }
 
+        if ($request->keyword){
+            $cl = new SphinxClient();
+            $cl->SetServer ( '127.0.0.1', 9312);
+//$cl->SetServer ( '10.6.0.6', 9312);
+//$cl->SetServer ( '10.6.0.22', 9312);
+//$cl->SetServer ( '10.8.8.2', 9312);
+            $cl->SetConnectTimeout ( 10 );
+            $cl->SetArrayResult ( true );
+// $cl->SetMatchMode ( SPH_MATCH_ANY);
+            $cl->SetMatchMode ( SPH_MATCH_EXTENDED2);
+            $cl->SetLimits(0, 1000);
+            $info = $request->keyword;
+            $res = $cl->Query($info, 'shops');//shopstore_search
+//print_r($cl);
+            if ($res['total']){
+                $data=collect($res['matches'])->pluck('id')->toArray();
+//                dd($data);
+                $res= DB::table('business_details')->whereIn('id',$data)->get();
+                return json_encode($res);
+            }else{
+                return [];
+            }
+        }
+        else {
+            $data = Redis::get('shops');
+            if ($data == false) {
+                $res = DB::table('business_details')->get();
+                Redis::set('shops', serialize($res), 3600);
+            } else {
+                $res = unserialize($data);
+            }
+//        dd(json_encode($res));
+            return json_encode($res);
+        }
+    }
     //店铺内容
     public function foods(Request $request)
     {
